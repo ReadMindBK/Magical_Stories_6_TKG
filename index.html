@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>Cuentos</title>
+
+
+  <style>
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #ffffff;
+      margin: 0;
+    }
+
+
+    .wrap {
+      max-width: 420px;
+      margin: auto;
+      padding: 10px;
+      text-align: center;
+    }
+
+
+    .cover {
+      width: 100%;
+      border-radius: 18px;
+      display: block;
+    }
+
+
+    /* =========================================================
+       CONFIGURACIÓN DEL ANCHO
+       ========================================================= */
+
+    :root {
+      --button-width: 220px;
+    }
+
+
+    /* =========================================================
+       CONTENEDOR DE BOTONES
+       ========================================================= */
+
+    #buttons {
+
+      display: flex;
+
+      flex-direction: column;
+
+      justify-content: center;
+
+      align-items: center;
+
+      gap: 10px;
+
+      margin-top: 20px;
+
+      width: 100%;
+
+    }
+
+
+    /* =========================================================
+       BOTÓN DE CAPÍTULO
+       ========================================================= */
+
+    .chapter-btn {
+
+      position: relative;
+
+      width: var(--button-width);
+
+      max-width: 90%;
+
+      box-sizing: border-box;
+
+      /* Padding simétrico para garantizar centrado de texto */
+      padding: 10px 30px;
+
+      margin: 0;
+
+      border: none;
+
+      border-radius: 10px;
+
+      background: #AF4CAB;
+
+      color: #ffffff;
+
+      box-shadow:
+        0 2px 7px rgba(0, 0, 0, 0.13);
+
+      font-size: 14px;
+
+      font-weight: bold;
+
+      line-height: 1.15;
+
+      cursor: pointer;
+
+      text-align: center; /* Texto centrado */
+
+      transition:
+        background 0.2s ease,
+        transform 0.15s ease,
+        box-shadow 0.2s ease;
+
+    }
+
+
+    /* =========================================================
+       CAPÍTULO ACTIVO (ILUMINADO EN NARANJA)
+       ========================================================= */
+
+    .chapter-btn.active {
+
+      background: #ff8c1a !important;
+
+      color: #ffffff;
+
+      box-shadow:
+        0 0 12px rgba(255, 140, 26, 0.8);
+
+    }
+
+
+    /* =========================================================
+       SÍMBOLO DEL ESTADO DEL AUDIO (A LA DERECHA)
+       ========================================================= */
+
+    .play-symbol {
+
+      position: absolute;
+
+      right: 12px;
+
+      top: 50%;
+
+      transform: translateY(-50%);
+
+      font-size: 13px;
+
+      font-weight: bold;
+
+      line-height: 1;
+
+    }
+
+
+    /* =========================================================
+       EFECTO AL TOCAR
+       ========================================================= */
+
+    .chapter-btn:active {
+
+      transform: scale(0.97);
+
+    }
+
+
+    /* =========================================================
+       BOTÓN FINAL WEB
+       ========================================================= */
+
+    .contenedor-enlace-web {
+
+      text-align: center;
+
+      margin-top: 180px;
+
+      margin-bottom: 15px;
+
+      width: 100%;
+
+    }
+
+
+    .enlace-imagen {
+
+      display: inline-block;
+
+      text-decoration: none;
+
+    }
+
+
+    .imagen-boton {
+
+      max-width: 260px;
+
+      width: 100%;
+
+      height: auto;
+
+      display: block;
+
+      margin: 0 auto;
+
+      transition:
+        transform 0.2s ease;
+
+    }
+
+
+    .imagen-boton:hover {
+
+      transform: scale(1.05);
+
+      cursor: pointer;
+
+    }
+
+
+  </style>
+
+</head>
+
+
+<body>
+
+
+  <div class="wrap">
+
+
+    <!-- PORTADA -->
+    <img
+      src="portada.png"
+      class="cover"
+      alt="Portada"
+    >
+
+
+    <!-- ÚNICO AUDIO -->
+    <audio
+      id="a"
+      src="cuento.mp3"
+      preload="auto">
+    </audio>
+
+
+    <!-- CONTENEDOR DE CAPÍTULOS -->
+    <div id="buttons"></div>
+
+
+    <!-- BOTÓN FINAL WEB -->
+    <div class="contenedor-enlace-web">
+
+      <a
+        href="https://readmindbk.github.io/WEB/"
+        class="enlace-imagen"
+        target="_blank"
+      >
+
+        <img
+          class="imagen-boton"
+          src="web.png"
+          alt="Sitio Web"
+        >
+
+      </a>
+
+    </div>
+
+
+  </div>
+
+
+  <script>
+
+    /* =========================================================
+       CONFIGURACIÓN DE TIEMPOS DE LOS CAPÍTULOS (EN SEGUNDOS)
+       Puedes modificar 'start' (inicio) y 'end' (fin) para cada capítulo.
+       ========================================================= */
+
+    const chapters = [
+      { name: 'CHAPTER 1', start: 0, end: 17.5 },
+      { name: 'CHAPTER 2', start: 18, end: 32 },
+      { name: 'CHAPTER 3', start: 32.5, end: 51.5 },
+      { name: 'CHAPTER 4', start: 52, end: 68},
+      { name: 'CHAPTER 5', start: 68.5, end: 88 },
+      { name: 'TEACHING', start: 88.5 }
+    ];
+
+
+    /* ELEMENTOS */
+    const audio = document.getElementById('a');
+    const buttonsContainer = document.getElementById('buttons');
+
+    let currentChapterIndex = null;
+
+
+    /* =========================================================
+       CREAR BOTONES DE CAPÍTULOS
+       ========================================================= */
+
+    chapters.forEach((ch, index) => {
+
+      const btn = document.createElement('button');
+      btn.className = 'chapter-btn';
+
+      const textSpan = document.createElement('span');
+      textSpan.textContent = ch.name;
+
+      const symbol = document.createElement('span');
+      symbol.className = 'play-symbol';
+      symbol.textContent = '';
+
+      btn.appendChild(textSpan);
+      btn.appendChild(symbol);
+
+      /* Click en un capítulo */
+      btn.onclick = () => {
+        handleChapterClick(index);
+      };
+
+      buttonsContainer.appendChild(btn);
+
+    });
+
+
+    /* =========================================================
+       LÓGICA AL PRESIONAR UN CAPÍTULO
+       ========================================================= */
+
+    function handleChapterClick(index) {
+
+      // Si se toca el capítulo que ya se está reproduciendo -> PAUSAR / REANUDAR
+      if (currentChapterIndex === index) {
+
+        if (audio.paused) {
+          audio.play();
+        } else {
+          audio.pause();
+        }
+
+      } else {
+
+        // Si se presiona un nuevo capítulo -> Cambiar y Reproducir
+        currentChapterIndex = index;
+        audio.currentTime = chapters[index].start;
+        audio.play();
+
+      }
+
+      updateUI();
+
+    }
+
+
+    /* =========================================================
+       ACTUALIZAR INTERFAZ (BOTONES E ICONOS)
+       ========================================================= */
+
+    function updateUI() {
+
+      const allButtons = buttonsContainer.querySelectorAll('.chapter-btn');
+
+      allButtons.forEach((btn, index) => {
+
+        const symbol = btn.querySelector('.play-symbol');
+
+        if (index === currentChapterIndex) {
+
+          btn.classList.add('active');
+
+          if (audio.paused) {
+            symbol.textContent = '⏸';
+          } else {
+            symbol.textContent = '▶';
+          }
+
+        } else {
+
+          btn.classList.remove('active');
+          symbol.textContent = '';
+
+        }
+
+      });
+
+    }
+
+
+    /* =========================================================
+       CONTROL AUTOMÁTICO DE TIEMPOS Y CONTINUIDAD
+       ========================================================= */
+
+    audio.addEventListener('timeupdate', () => {
+
+      if (currentChapterIndex === null) return;
+
+      const currentChapter = chapters[currentChapterIndex];
+
+      // Al llegar al final del capítulo actual
+      if (audio.currentTime >= currentChapter.end) {
+
+        // Si hay un siguiente capítulo -> pasar automáticamente al siguiente
+        if (currentChapterIndex < chapters.length - 1) {
+
+          currentChapterIndex++;
+
+          // Asegurar salto exacto al inicio del siguiente capítulo
+          if (audio.currentTime < chapters[currentChapterIndex].start) {
+            audio.currentTime = chapters[currentChapterIndex].start;
+          }
+
+          updateUI();
+
+        } else {
+
+          // Si es el último capítulo -> detener
+          audio.pause();
+          currentChapterIndex = null;
+          updateUI();
+
+        }
+
+      }
+
+    });
+
+
+    /* EVENTOS DEL AUDIO PARA MANTENER LA INTERFAZ AL DÍA */
+
+    audio.addEventListener('play', () => {
+      updateUI();
+    });
+
+    audio.addEventListener('pause', () => {
+      updateUI();
+    });
+
+    audio.addEventListener('ended', () => {
+      currentChapterIndex = null;
+      updateUI();
+    });
+
+  </script>
+
+</body>
+
+</html>
